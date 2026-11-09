@@ -72,7 +72,7 @@ footer p+p{margin-top:6px}
 </head>
 <body>
 <nav class="top" aria-label="Sections">
-  <a href="#result">The result</a><a href="#number">Watch a number</a><a href="#gatecode">The gate's code</a><a href="#rerun">Re-run it</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
+  <a href="#result">The result</a><a href="#number">Watch a number</a><a href="#gatecode">The gate's code</a><a href="#rerun">Re-run it</a><a href="#words">Words</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
 </nav>
 <header class="hero">
   <h1>Settling where it fits, exact code where it must be.</h1>
@@ -118,7 +118,21 @@ footer p+p{margin-top:6px}
 <section id="what">
   <h2>What this is</h2>
   <p>This is Rung 3 of a ladder toward computing by geometry instead of by large models. Rungs 1 and 2 built a cell that reads a digit by settling and a loop that improves it with no model. Rung 3 asks how such a cell should sit inside a real job: let it do the fuzzy part, let exact code do the exact part, and keep the decision in a few lines a person can read and audit.</p>
-  <p>The job is reading handwritten account numbers that end in a Luhn check digit, the same kind of check used on card and account numbers. A single misread digit always breaks the check, so exact code can catch it, and sometimes repair it.</p>
+  <p>The job is reading handwritten account numbers that end in a Luhn check digit, the same kind of check used on card and account numbers. A single misread digit always breaks the check, so exact code can catch it, and sometimes repair it. What the other rungs found, held and failed, is on the <a href="https://sjgant80-hub.github.io/geometric-ladder/">ladder page</a>.</p>
+</section>
+
+<section id="words">
+  <h2>Words on this page</h2>
+  <div class="tablewrap"><table>
+    <tr><td><b>Cell, settle</b></td><td>The small digit reader from Rungs 1 and 2. It reads a digit by flipping its bits towards stored patterns until nothing more changes, and answers with the class it ends up nearest.</td></tr>
+    <tr><td><b>Luhn check digit</b></td><td>The last digit of the number is computed from the others by a fixed rule, as on card numbers. Any single wrong digit breaks the rule, so a misread always shows.</td></tr>
+    <tr><td><b>Confidence, τ</b></td><td>A digit's confidence is its top class's share of the total fit after settling. τ is the share a digit must reach to be trusted, chosen on the tune numbers only, before the test numbers were read.</td></tr>
+    <tr><td><b>Accept, refer</b></td><td>Accept: the number is passed on as read. Refer: it goes to a person, with the reason (no fit, low confidence, or check failed).</td></tr>
+    <tr><td><b>Repair</b></td><td>If the check fails, the least confident digit is solved from the check rule. The fix is accepted only if the solved value was the cell's own second choice for that digit and every other digit is confident.</td></tr>
+    <tr><td><b>Step-code</b></td><td>The exact part: ordinary tested code (the Luhn rule), checked here on all 100,000 five-digit strings.</td></tr>
+    <tr><td><b>The gate</b></td><td>The few lines that make the accept or refer decision, shown in full on this page so a person can audit them.</td></tr>
+    <tr><td><b>Seal, mutation gate</b></td><td>Seal: the claims, then the frozen cell and τ, committed to the public record before the test numbers are read. Mutation gate: a tool (witness) that breaks the code in small ways and checks the tests catch every break.</td></tr>
+  </table></div>
 </section>
 
 <section id="start">
@@ -176,6 +190,15 @@ footer p+p{margin-top:6px}
     <div class="card"><div class="k">For engineering</div><p style="margin-top:6px">Put the fuzzy part in the cell, the exact part in tested code, and the decision in a function short enough to audit. The step-code is checked on all 100,000 five-digit strings.</p></div>
     <div class="card"><div class="k">For risk and procurement</div><p style="margin-top:6px">No model, no vendor, no network. Every decision is logged with its reason, and the record re-derives from pinned files on GitHub's runner and in your browser.</p></div>
   </div>
+  <h3>A pilot, step by step</h3>
+  <ol>
+    <li>Pick one keying task where the input carries its own check (a check digit, a total, a reference that must exist).</li>
+    <li>Write down the bars it must meet before anything is built, and seal them: how often an accepted case may be wrong, and how much it must take off your team.</li>
+    <li>Tune on your past cases only; keep a held-out slice untouched.</li>
+    <li>Freeze it, then judge it once on the held-out slice. The fee is due only if it beat your current way.</li>
+    <li>Run it beside your keyers, deciding nothing, and compare every accept with what they keyed.</li>
+  </ol>
+  <p class="muted">What it runs on: Node.js 20 or a current browser. No GPU, no cloud service, no model download.</p>
 </section>
 
 <section id="paper">
