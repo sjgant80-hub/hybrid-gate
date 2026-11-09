@@ -15,14 +15,16 @@ export function inkOf(img) {
   const h = r1 - r0 + 1, w = c1 - c0 + 1, s = Math.max(h, w), top = r0 - ((s - h) >> 1), left = c0 - ((s - w) >> 1);
   for (let ty = 0; ty !== BOX; ty++) for (let tx = 0; tx !== BOX; tx++) {
     const sy = top + Math.floor((ty * s) / BOX), sx = left + Math.floor((tx * s) / BOX);
-    if (sy >= 0 && sy < SRC && sx >= 0 && sx < SRC && img[sy * SRC + sx] > CUT) ink[(ty >> 2) * GRID + (tx >> 2)]++;
+    // No upper-bound test is needed: a row past 27 reads past the image (undefined, not ink), and a column past 27 wraps
+    // to a column left of the ink's bounding box, which by construction holds no ink.
+    if (sy >= 0 && sx >= 0 && img[sy * SRC + sx] > CUT) ink[(ty >> 2) * GRID + (tx >> 2)]++;
   }
   return ink;
 }
 
 /** parse(images, labels) → { x, y }: every digit of an idx3 image file and its idx1 label file, as ink grids. */
 export function parse(images, labels) {
-  if (!images || !labels || images.length < 16 || labels.length < 8 || u32(images, 0) !== 2051 || u32(labels, 0) !== 2049) return { x: [], y: [] };
+  if (!images || !labels || u32(images, 0) !== 2051 || u32(labels, 0) !== 2049) return { x: [], y: [] };
   const n = u32(images, 4);
   if (u32(labels, 4) !== n || u32(images, 8) !== SRC || u32(images, 12) !== SRC || images.length !== 16 + n * SRC * SRC || labels.length !== 8 + n) return { x: [], y: [] };
   const x = [], y = [];

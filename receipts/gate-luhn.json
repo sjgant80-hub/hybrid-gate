@@ -1,0 +1,9 @@
+{
+ "kernel": "src/luhn.mjs",
+ "witness": "v0.6",
+ "total": 5,
+ "killed": 5,
+ "survived": 0,
+ "ignored": 0,
+ "clean": true
+}

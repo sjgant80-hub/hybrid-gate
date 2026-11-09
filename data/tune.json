@@ -1,0 +1,132 @@
+{
+ "tau": 50,
+ "met": false,
+ "tuneNumbers": 5998,
+ "settings": {
+  "b": 4,
+  "k": 20,
+  "R": 64,
+  "n": 6,
+  "grow": 30000
+ },
+ "rule": "the smallest τ in 50..100 step 5 whose accepted tune numbers are at least 99.5% exactly right; if none (amendment 1), the highest tune precision, the smaller on a tie",
+ "table": [
+  {
+   "tau": 50,
+   "acc": 3108,
+   "right": 2775
+  },
+  {
+   "tau": 55,
+   "acc": 3100,
+   "right": 2767
+  },
+  {
+   "tau": 60,
+   "acc": 3084,
+   "right": 2751
+  },
+  {
+   "tau": 65,
+   "acc": 3084,
+   "right": 2751
+  },
+  {
+   "tau": 70,
+   "acc": 3079,
+   "right": 2746
+  },
+  {
+   "tau": 75,
+   "acc": 3072,
+   "right": 2742
+  },
+  {
+   "tau": 80,
+   "acc": 2906,
+   "right": 2593
+  },
+  {
+   "tau": 85,
+   "acc": 2460,
+   "right": 2175
+  },
+  {
+   "tau": 90,
+   "acc": 1823,
+   "right": 1598
+  },
+  {
+   "tau": 95,
+   "acc": 792,
+   "right": 673
+  },
+  {
+   "tau": 100,
+   "acc": 0,
+   "right": 0
+  }
+ ],
+ "explore": {
+  "tau": 85,
+  "met": false,
+  "table": [
+   {
+    "tau": 50,
+    "acc": 2579,
+    "right": 2464
+   },
+   {
+    "tau": 55,
+    "acc": 2433,
+    "right": 2326
+   },
+   {
+    "tau": 60,
+    "acc": 2276,
+    "right": 2174
+   },
+   {
+    "tau": 65,
+    "acc": 2095,
+    "right": 2001
+   },
+   {
+    "tau": 70,
+    "acc": 1860,
+    "right": 1778
+   },
+   {
+    "tau": 75,
+    "acc": 1618,
+    "right": 1549
+   },
+   {
+    "tau": 80,
+    "acc": 1334,
+    "right": 1278
+   },
+   {
+    "tau": 85,
+    "acc": 1017,
+    "right": 980
+   },
+   {
+    "tau": 90,
+    "acc": 620,
+    "right": 594
+   },
+   {
+    "tau": 95,
+    "acc": 252,
+    "right": 238
+   },
+   {
+    "tau": 100,
+    "acc": 0,
+    "right": 0
+   }
+  ],
+  "note": "not a sealed claim (AMENDMENT.md)"
+ }
+}
