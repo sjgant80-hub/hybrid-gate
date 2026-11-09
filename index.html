@@ -128,7 +128,8 @@ footer p+p{margin-top:6px}
     <tr><td><b>Luhn check digit</b></td><td>The last digit of the number is computed from the others by a fixed rule, as on card numbers. Any single wrong digit breaks the rule, so a misread always shows.</td></tr>
     <tr><td><b>Confidence, τ</b></td><td>A digit's confidence is its top class's share of the total fit after settling. τ is the share a digit must reach to be trusted, chosen on the tune numbers only, before the test numbers were read.</td></tr>
     <tr><td><b>Accept, refer</b></td><td>Accept: the number is passed on as read. Refer: it goes to a person, with the reason (no fit, low confidence, or check failed).</td></tr>
-    <tr><td><b>Repair</b></td><td>If the check fails, the least confident digit is solved from the check rule. The fix is accepted only if the solved value was the cell's own second choice for that digit and every other digit is confident.</td></tr>
+    <tr><td><b>Margin gate</b></td><td>An extra gate tried after tuning, as an exploration: it judges a digit's confidence by its margin before settling. It is shown beside the result and is not one of the sealed claims.</td></tr>
+    <tr><td><b>Repair, doubtful digit</b></td><td>If the check fails, the doubtful digit (the least confident one) is solved from the check rule. The fix is accepted only if the solved value was the cell's own second choice for that digit and every other digit is confident.</td></tr>
     <tr><td><b>Step-code</b></td><td>The exact part: ordinary tested code (the Luhn rule), checked here on all 100,000 five-digit strings.</td></tr>
     <tr><td><b>The gate</b></td><td>The few lines that make the accept or refer decision, shown in full on this page so a person can audit them.</td></tr>
     <tr><td><b>Seal, mutation gate</b></td><td>Seal: the claims, then the frozen cell and τ, committed to the public record before the test numbers are read. Mutation gate: a tool (witness) that breaks the code in small ways and checks the tests catch every break.</td></tr>
@@ -203,7 +204,7 @@ footer p+p{margin-top:6px}
 
 <section id="paper">
   <h2>White paper: a hybrid with an inspectable gate</h2>
-  <p><b>The question.</b> A settling cell is good at fuzzy matching and bad at exact work; code is the reverse. Rung 3 asks whether combining them, with the decision kept in readable code, gives a reader you can trust on a real job: high precision on what it accepts, and a reason for everything it refers.</p>
+  <p><b>The question.</b> A settling cell is good at fuzzy matching and bad at exact work; code is the reverse. Rung 3 asks whether combining them, with the decision kept in readable code, gives a reader you can trust on a real job: high precision on what it accepts, and a reason for everything it refers. The answer, below, is mixed: every decision carried its reason and wrong accepts fell sharply, but accepted numbers were not right often enough to meet the bar.</p>
   <p><b>The method.</b> MNIST handwritten digits, converted the way the optical digits were made. A cell grown by Rung 1's kernel with Rung 1's settings on half the training digits. Tune numbers from the other half; held-out numbers from the 10,000 test digits, read once after the cell and τ were frozen.</p>
   <p><b>The results, from the record:</b></p>
   <ul id="results"></ul>
