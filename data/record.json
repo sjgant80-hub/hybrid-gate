@@ -1,0 +1,73 @@
+{
+ "record": {
+  "explore": {
+   "tau": 85,
+   "accepted": 374,
+   "right": 359,
+   "note": "not a sealed claim (AMENDMENT.md)"
+  },
+  "cellHash": "8fa097afba765e457729a25c57c1ca74bab02de49a6b6d9d1d6c9366d637f0f9",
+  "tau": 50,
+  "numbers": 1999,
+  "digits": 10000,
+  "settleOnlyRight": 924,
+  "accepted": 1126,
+  "right": 997,
+  "repaired": 170,
+  "repairedRight": 79,
+  "acceptedNoRepair": 956,
+  "reasons": {
+   "ok": 956,
+   "repaired": 170,
+   "no-fit": 52,
+   "low-confidence": 8,
+   "check-failed": 813
+  },
+  "consistent": true,
+  "lows": {
+   "H4": 0.450725,
+   "H5": 0.072536
+  },
+  "hash": "5b01700bed355c5c77c4c1cafb1dcaf3ee2177e5e2d1b295949d92a7f37f3ec1"
+ },
+ "verdicts": [
+  {
+   "id": "H2",
+   "what": "every decision carries a reason, and verdict and reason agree",
+   "measured": true,
+   "bar": "true",
+   "pass": true
+  },
+  {
+   "id": "H3",
+   "what": "share of accepted numbers exactly right",
+   "measured": 0.885435,
+   "bar": "at least 0.99",
+   "pass": false
+  },
+  {
+   "id": "H4",
+   "what": "settle-only error rate minus the hybrid's wrong-accept rate: 95% lower bound",
+   "measured": 0.450725,
+   "bar": "above 0",
+   "pass": true
+  },
+  {
+   "id": "H5",
+   "what": "coverage added by repair: lower bound, and the share of repairs exactly right",
+   "measured": [
+    0.072536,
+    0.464706
+   ],
+   "bar": "above 0, and at least 0.95",
+   "pass": false
+  },
+  {
+   "id": "H6",
+   "what": "share of held-out numbers the hybrid accepts",
+   "measured": 0.563282,
+   "bar": "at least 0.4",
+   "pass": true
+  }
+ ]
+}

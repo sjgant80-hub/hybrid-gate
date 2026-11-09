@@ -1,0 +1,26 @@
+name: proof
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: the conversion, the step-code (H1, exhaustive), the gate, the runner, the page and the pins (H8, H9)
+        run: node --test test/hybrid.test.mjs test/page.test.mjs
+      - name: the cell and both tau values re-derived from the training file, byte for byte
+        run: node tools/tune.mjs --check
+      - name: the held-out record re-derived byte for byte (H2-H7)
+        run: node tools/run.mjs --check
+      # Pinned. An unpinned gate is a gate somebody else can change.
+      - name: witness - try to break each kernel, then READ the verdict (must be CLEAN, nothing baselined)
+        run: |
+          git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness
+          for k in mnist luhn numbers gate explore run; do
+            node /tmp/witness/witness.mjs mutate "src/$k.mjs" --timeout 120000 --cap 1000 --test node --test test/hybrid.test.mjs > "verdict-$k.txt" 2>&1
+            tail -3 "verdict-$k.txt"
+            grep -q '"clean": true' "verdict-$k.txt" || { echo "::error::mutants survived in src/$k.mjs"; exit 1; }
+            node tools/gate-receipt.mjs "$k" "src/$k.mjs" "verdict-$k.txt" --check
+          done

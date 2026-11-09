@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hybrid gate · settling, exact code, and a readable gate</title>
+<meta name="description" content="Rung 3 of the geometric ladder: a settling cell reads handwritten account numbers, exact code checks and repairs the Luhn digit, and a few lines of readable code decide accept or refer.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<style>
+:root{--bg:#f7f5f0;--panel:#ffffff;--ink:#1d1c1a;--muted:#6b665c;--line:rgba(29,28,26,.12);--accent:#3f6b47;--accent-dim:rgba(63,107,71,.10);--win:#2f7a3d;--tie:#a5701c;--bad:#b3452c;--px0:#ffffff;--px1:#1d1c1a;--mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',-apple-system,system-ui,sans-serif;--serif:'Cormorant Garamond','Iowan Old Style',Georgia,serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1e;--panel:#212127;--ink:#e8e4db;--muted:#928d80;--line:rgba(232,228,219,.12);--accent:#7a9c7e;--accent-dim:rgba(122,156,126,.14);--win:#7acc85;--tie:#d4a052;--bad:#d67a5a;--px0:#212127;--px1:#e8e4db}}
+:root[data-theme="dark"]{--bg:#1a1a1e;--panel:#212127;--ink:#e8e4db;--muted:#928d80;--line:rgba(232,228,219,.12);--accent:#7a9c7e;--accent-dim:rgba(122,156,126,.14);--win:#7acc85;--tie:#d4a052;--bad:#d67a5a;--px0:#212127;--px1:#e8e4db}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+main{max-width:1040px;margin:0 auto;padding:0 16px 64px}
+nav.top{position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap;padding:8px 16px;font-family:var(--mono);font-size:12px}
+nav.top a{color:var(--muted);text-decoration:none} nav.top a:hover{color:var(--accent)}
+header.hero{max-width:1040px;margin:0 auto;padding:36px 16px 10px}
+h1{font-family:var(--serif);font-size:clamp(34px,6vw,58px);line-height:1.05;font-weight:600}
+.lede{font-size:19px;color:var(--muted);max-width:780px;margin-top:10px}
+.verdictline{font-size:17px;margin-top:12px;max-width:780px}
+section{margin-top:40px}
+h2{font-family:var(--serif);font-size:30px;font-weight:600;margin-bottom:8px}
+h3{font-size:16px;margin:16px 0 6px}
+p+p{margin-top:8px} ul,ol{padding-left:22px} li{margin:4px 0}
+.muted{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card .k{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.card .big{font-size:26px;font-weight:600;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.card .vs{font-size:14px;color:var(--muted)}
+.chip{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;padding:2px 10px;border-radius:12px;white-space:nowrap}
+.chip.win{background:color-mix(in srgb,var(--win) 15%,transparent);color:var(--win)} .chip.bad{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.bar{height:10px;border-radius:5px;background:var(--line);margin:3px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .08s linear} .bar.m i{background:var(--muted)}
+button{font:inherit;font-size:15px;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:9px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--tie);outline-offset:2px}
+button:disabled{opacity:.55;cursor:progress}
+select{font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin-top:10px}
+td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+.ok{color:var(--win);font-weight:600} .no{color:var(--bad);font-weight:600}
+.svgwrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px}
+.svgwrap svg{display:block;min-width:680px;width:100%;height:auto}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-dim);padding:1px 5px;border-radius:3px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+.controls label{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
+.controls input{width:90px;font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px}
+.stage{display:grid;grid-template-columns:minmax(200px,280px) 1fr;gap:18px;align-items:start;margin-top:10px}
+.stage canvas{width:100%;height:auto;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:var(--px0);image-rendering:pixelated}
+.fits{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 8px;align-items:center;font-family:var(--mono);font-size:12.5px}
+.fits .bar{margin:0}
+.fits .win i{background:var(--win)}
+.readout{font-size:15px;margin-top:8px}
+.memories{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:10px}
+.memories figure{text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.memories canvas{width:100%;height:auto;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;image-rendering:pixelated;background:var(--px0)}
+.timeline{list-style:none;padding:0;border-left:2px solid var(--accent);margin-top:10px}
+.timeline li{padding:4px 0 8px 14px;position:relative}
+.timeline li::before{content:'';position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.timeline b{font-family:var(--mono);font-size:12.5px}
+footer{max-width:1040px;margin:0 auto;padding:22px 16px 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+footer p+p{margin-top:6px}
+@media (max-width:640px){.stage{grid-template-columns:1fr}.stage canvas{max-width:260px}td,th{padding:6px 5px;font-size:13.5px}}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections">
+  <a href="#result">The result</a><a href="#number">Watch a number</a><a href="#gatecode">The gate's code</a><a href="#rerun">Re-run it</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#paper">White paper</a><a href="#business">For business</a>
+</nav>
+<header class="hero">
+  <h1>Settling where it fits, exact code where it must be.</h1>
+  <p class="lede">Handwritten account numbers carry a check digit. Here a settling cell reads each digit, plain exact code checks the arithmetic and can repair one doubtful digit, and a gate you can read in a minute decides: accept, or refer to a person. Every decision comes with its reason. The bars were sealed first, and the numbers were built from handwritten digits the system never saw.</p>
+  <p class="verdictline" id="verdictline">Loading the record…</p>
+</header>
+<main>
+
+<section id="result">
+  <h2>The result</h2>
+  <p class="muted">Each claim was written down with its bar before the code that makes it (<a href="CLAIMS.md">CLAIMS.md</a>). Tuning found the sealed rule for τ had no answer, and one gap in it was filled before the test digits were read (<a href="AMENDMENT.md">AMENDMENT.md</a>). The cell and τ were then frozen by hash (<a href="SEAL2.md">SEAL2.md</a>). A claim that misses its bar is kept and shown as failed. Every number is read from the committed record.</p>
+  <div class="tablewrap"><table id="claims"><thead><tr><th>Claim</th><th>What it says</th><th>Measured</th><th>Bar</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
+  <h3>Four ways to read the same numbers</h3>
+  <div class="tablewrap"><table id="ways"><thead><tr><th>Reader</th><th>Accepted</th><th>Of those, exactly right</th><th>Wrong numbers let through</th></tr></thead><tbody></tbody></table></div>
+  <h3>Why each number was referred or accepted</h3>
+  <div class="tablewrap"><table id="reasons"><thead><tr><th>Reason</th><th>Numbers</th><th>What it means</th></tr></thead><tbody></tbody></table></div>
+  <h3>What the result says</h3>
+  <p id="lesson">…</p>
+</section>
+
+<section id="number">
+  <h2>Watch a number</h2>
+  <p class="muted">A real held-out number, built from five handwritten test digits. See what the cell read for each digit, how sure it was, what the exact code found, and why the gate decided what it did.</p>
+  <div class="controls"><button id="another" class="ghost">Another number</button></div>
+  <div class="memories" id="digits" style="grid-template-columns:repeat(5,minmax(52px,90px))"></div>
+  <div class="tablewrap"><table id="numtable"><thead><tr><th>Digit</th><th>Written</th><th>Read</th><th>Runner-up</th><th>Confidence</th></tr></thead><tbody></tbody></table></div>
+  <p class="readout" id="numread">Loading…</p>
+</section>
+
+<section id="gatecode">
+  <h2>The gate's code, exactly as it runs</h2>
+  <p class="muted">This is read from <code>src/gate.mjs</code> on this site, not retyped. These lines are the whole decision.</p>
+  <pre id="gatesrc" style="overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.5">Loading…</pre>
+</section>
+
+<section id="rerun">
+  <h2>Re-run it in your browser</h2>
+  <p>Your tab loads the MNIST test digits and the frozen cell, rebuilds every held-out number exactly as sealed, reads and decides each one, and hashes the full record. It sends nothing anywhere.</p>
+  <div class="controls"><button id="go">Re-run the held-out numbers</button><span id="gostatus" class="muted"></span></div>
+  <div class="tablewrap"><table id="proof" hidden><thead><tr><th>Number</th><th>Your tab</th><th>The record</th><th></th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section id="what">
+  <h2>What this is</h2>
+  <p>This is Rung 3 of a ladder toward computing by geometry instead of by large models. Rungs 1 and 2 built a cell that reads a digit by settling and a loop that improves it with no model. Rung 3 asks how such a cell should sit inside a real job: let it do the fuzzy part, let exact code do the exact part, and keep the decision in a few lines a person can read and audit.</p>
+  <p>The job is reading handwritten account numbers that end in a Luhn check digit, the same kind of check used on card and account numbers. A single misread digit always breaks the check, so exact code can catch it, and sometimes repair it.</p>
+</section>
+
+<section id="start">
+  <h2>Start here</h2>
+  <ol>
+    <li>Read <a href="#result">The result</a>: every sealed claim, the four readers side by side, and why each number went where it did.</li>
+    <li>In <a href="#number">Watch a number</a>, press <b>Another number</b> and follow one decision from the digits to the verdict.</li>
+    <li>Read <a href="#gatecode">The gate's code</a>: the decision, line by line.</li>
+    <li>Press <b>Re-run</b>: your tab rebuilds and re-decides every held-out number and checks the hash.</li>
+    <li>Want it off this page? Clone the repo and run <code>node --test test/*.test.mjs</code>, <code>node tools/tune.mjs --check</code> and <code>node tools/run.mjs --check</code>.</li>
+  </ol>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <div class="svgwrap">
+    <svg viewBox="0 0 900 220" role="img" aria-label="Five handwritten digits are read by settling, exact code checks the Luhn digit and may repair one digit, and the gate accepts or refers with a reason">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+      <g fill="none" stroke="currentColor" stroke-width="1.4" style="color:var(--muted)">
+        <rect x="10" y="60" width="170" height="100" rx="10"/><rect x="225" y="60" width="190" height="100" rx="10"/><rect x="460" y="60" width="200" height="100" rx="10"/><rect x="705" y="60" width="185" height="100" rx="10"/>
+        <path d="M180 110H221" marker-end="url(#ar)"/><path d="M415 110H456" marker-end="url(#ar)"/><path d="M660 110H701" marker-end="url(#ar)"/>
+      </g>
+      <g font-family="ui-monospace,monospace" font-size="13" fill="currentColor" style="color:var(--ink)">
+        <text x="25" y="92">five handwritten</text><text x="25" y="110">digits: the last is</text><text x="25" y="128">the check digit</text>
+        <text x="240" y="92">settling reads each</text><text x="240" y="110">digit, with its</text><text x="240" y="128">confidence</text>
+        <text x="475" y="92">exact code: is the</text><text x="475" y="110">Luhn check right? if</text><text x="475" y="128">not, solve one digit</text>
+        <text x="720" y="92">the gate: accept,</text><text x="720" y="110">repair, or refer,</text><text x="720" y="128">always with a reason</text>
+        <text x="225" y="200" style="fill:var(--muted)">fuzzy work by settling · exact work by step-code · the decision in plain code</text>
+      </g>
+    </svg>
+  </div>
+  <h3>Step by step</h3>
+  <ol>
+    <li><b>Assemble.</b> Each held-out number is four handwritten test digits plus a fifth whose label is their Luhn check digit. Every image is used once.</li>
+    <li><b>Read.</b> The settling cell reads each digit and reports how much of its fit the winning class holds: its confidence.</li>
+    <li><b>Check.</b> Exact code computes the Luhn check. Any single misread digit breaks it, always.</li>
+    <li><b>Repair.</b> If the check fails, the code takes the least confident digit and solves for the one value that would fix the check. If that value is the cell's own runner-up for that digit, the number is accepted as repaired.</li>
+    <li><b>Decide.</b> The gate accepts a number only when the check holds and every digit is confident enough (τ), or after a repair; otherwise it refers it, with the reason.</li>
+  </ol>
+  <h3>What tuning found</h3>
+  <p id="tunenote" class="muted">Loading the tuning table…</p>
+</section>
+
+<section id="blueprint">
+  <h2>Blueprint</h2>
+  <div class="cards" id="parts"></div>
+  <h3>The order things happened in, as the git history shows it</h3>
+  <ul class="timeline" id="timeline"></ul>
+</section>
+
+<section id="adoption">
+  <h2>Adoption</h2>
+  <div class="cards">
+    <div class="card"><div class="k">For a business</div><p style="margin-top:6px">Keying handwritten account numbers is real work. A small owned reader can take the clear cases, and exact arithmetic catches every single misread digit. Everything doubtful goes to a person, with a reason.</p></div>
+    <div class="card"><div class="k">For engineering</div><p style="margin-top:6px">Put the fuzzy part in the cell, the exact part in tested code, and the decision in a function short enough to audit. The step-code is checked on all 100,000 five-digit strings.</p></div>
+    <div class="card"><div class="k">For risk and procurement</div><p style="margin-top:6px">No model, no vendor, no network. Every decision is logged with its reason, and the record re-derives from pinned files on GitHub's runner and in your browser.</p></div>
+  </div>
+</section>
+
+<section id="paper">
+  <h2>White paper: a hybrid with an inspectable gate</h2>
+  <p><b>The question.</b> A settling cell is good at fuzzy matching and bad at exact work; code is the reverse. Rung 3 asks whether combining them, with the decision kept in readable code, gives a reader you can trust on a real job: high precision on what it accepts, and a reason for everything it refers.</p>
+  <p><b>The method.</b> MNIST handwritten digits, converted the way the optical digits were made. A cell grown by Rung 1's kernel with Rung 1's settings on half the training digits. Tune numbers from the other half; held-out numbers from the 10,000 test digits, read once after the cell and τ were frozen.</p>
+  <p><b>The results, from the record:</b></p>
+  <ul id="results"></ul>
+  <p><b>The limits, plainly:</b></p>
+  <ul>
+    <li>Numbers are assembled from isolated digits, not cut from real forms. Finding digits on a page is a separate step.</li>
+    <li>The digit reader is the ceiling. At about 85% per digit, five-digit numbers carry too many double errors for 99% precision, whatever the gate does.</li>
+    <li>The sealed τ rule had no answer on tune; the gap was filled by a disclosed amendment before the test digits were read. The margin gate shown beside is exploratory, designed after tuning, and not a claim.</li>
+    <li>Rung 3 is not a mesh (Rung 4), not a defence (Rung 5), and not on a chip (Rung 7).</li>
+  </ul>
+</section>
+
+<section id="business">
+  <h2>For business</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Who</th><th>What this means for them</th></tr></thead>
+    <tr><td>CEO</td><td>A clear split of work: the system takes the cases it can prove, people take the rest, and every referral says why.</td></tr>
+    <tr><td>Finance</td><td>No per-call fee and no seats. The exact check is free and perfect at what it does. The cost case below uses your own numbers.</td></tr>
+    <tr><td>Operations</td><td>Referrals come sorted by reason (no fit, low confidence, check failed), so the queue can be worked in the right order.</td></tr>
+    <tr><td>CTO / CISO</td><td>The decision is a short function anyone can read; the arithmetic is exhaustively tested; nothing leaves your hardware.</td></tr>
+  </table></div>
+  <h3>The cost case for one process</h3>
+  <p class="muted">Your numbers in; sourced figures for the rest: UK median wage, CPI, electricity, and today's seat and API prices, each source listed. These are your costs. No price of ours appears. The starting values are an example process: a team keying handwritten account numbers off paper. Put in your own.</p>
+  <div class="controls">
+    <label>hours a week <input id="c-hours" type="number" min="0" max="168" value="20"></label>
+    <label>share taken off % <input id="c-share" type="number" min="0" max="100" value="50"></label>
+    <label>people <input id="c-seats" type="number" min="0" value="5"></label>
+    <label>cases a week <input id="c-cases" type="number" min="0" value="500"></label>
+    <label>years <input id="c-years" type="number" min="1" max="10" value="3"></label>
+  </div>
+  <p id="c-head" style="font-size:17px">…</p>
+  <div class="tablewrap"><table id="c-table"><thead><tr><th>Route</th><th>What it means</th><th>A year</th><th id="c-overh">Over the years</th></tr></thead><tbody></tbody></table></div>
+  <p id="c-note" class="muted" style="margin-top:8px"></p>
+  <h3>The case for the board</h3>
+  <p id="c-board"></p>
+  <h3>Questions buyers ask</h3>
+  <div class="tablewrap"><table>
+    <tr><td><b>What share would it take off our team?</b></td><td id="faq-share">Loading…</td></tr>
+    <tr><td><b>Can a wrong number get through?</b></td><td id="faq-wrong">Loading…</td></tr>
+    <tr><td><b>Can it read our forms?</b></td><td>Not by itself. It reads isolated digits; finding each digit on a page is a separate step. Your numbers would also need a check digit for the exact part to work.</td></tr>
+    <tr><td><b>How would we test it on our own data?</b></td><td>The same way as here: seal the bars, tune on part of your labelled numbers, freeze the reader and τ by hash, and read the rest once. The fee is due only if it beat your current way.</td></tr>
+    <tr><td><b>Our inputs are personal data. What about UK GDPR?</b></td><td>It runs where your data already is, so no model vendor or new processor is added and nothing is sent out. Your own data protection officer still signs off the use; no legal sign-off is claimed here.</td></tr>
+    <tr><td><b>What failed?</b></td><td id="faq-failed">Loading…</td></tr>
+    <tr><td><b>Who has done this for a client? Is it certified?</b></td><td>No client case study is published yet, and no certification is claimed. What you can check is that the record re-derives from pinned files, on GitHub's runner and in your browser.</td></tr>
+  </table></div>
+  <p style="margin-top:10px">Supplied by <a href="https://www.ai-nativesolutions.com" rel="noopener">AI Native Solutions</a>; contact through that site. Support, SLA, warranty and liability are agreed per deployment. The code is MIT and keeps running without us. The rungs below: <a href="https://sjgant80-hub.github.io/settling-cell/">the settling cell</a> and <a href="https://sjgant80-hub.github.io/code-rsi/">the model-free loop</a>.</p>
+  <p class="muted" style="margin-top:8px">Sources, as read into the cost basis:</p>
+  <ul id="c-src" class="muted" style="font-size:13px"></ul>
+</section>
+</main>
+<footer>
+  <p>Data: the MNIST database of handwritten digits, Y. LeCun, C. Cortes and C. J. C. Burges, CC BY-SA 3.0, from Google's public mirror. The files are pinned by SHA-256 in <a href="CLAIMS.md">CLAIMS.md</a>.</p>
+  <p>The cell kernel, the seeded rng and SHA-256 come from <a href="https://github.com/sjgant80-hub/settling-cell">settling-cell</a> (Rung 1), vendored byte for byte. The cell's energy follows Hopfield (1982) and Krotov &amp; Hopfield (2016). The check digit is H. P. Luhn's (1960).</p>
+  <p>Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  <p>MIT licence for the code; the MNIST files keep their CC BY-SA 3.0 licence · <a href="https://github.com/sjgant80-hub/hybrid-gate">source</a> · Rung 3 of the geometric ladder.</p>
+</footer>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>
